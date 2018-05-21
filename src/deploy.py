@@ -5,7 +5,7 @@ import psycopg2
 import service
 
 
-def deploy():
+def start():
     s = service.Service({})
     s.start()
     configure(s)
@@ -22,8 +22,8 @@ def configure(service):
     configure_reporting_api(service)
 
 
-def docker_exec_run(container, command, check=True):
-    res = container.exec_run(command)
+def docker_exec_run(container, command, environment=None, check=True):
+    res = container.exec_run(command, environment=None)
     if check and res[0] != 0:
         raise Exception("command failed with output: " + res[1])
     return res
@@ -63,6 +63,20 @@ def configure_database(service):
     db_set_passwords(service.db, service.vault)
 
 
+def configure_proxy(service):
+    print("Configuring proxy")
+
+    env = {
+        "HT_USER": "orderly",
+        "HT_PASS": vault_read(service.vault, "secret/proxy/login", "value"),
+        "SSL_CERTIFICATE":
+        vault_read(service.vault, "secret/proxy/ssl_certificate", "value"),
+        "SSL_PRIVATE_KEY":
+        vault_read(service.vault, "secret/proxy/ssl_private_key", "value")
+    }
+    docker_exec_run(service.proxy, "configure_proxy", environment=env)
+
+
 def db_connect(user, password):
     conn_settings = {
         "host": "localhost",
@@ -85,7 +99,7 @@ def db_set_password(db, user, password):
 def db_set_passwords(container, vault):
     print("Setting database passwords")
     users = vault.list("secret/database/users")["data"]["keys"]
-    pw = {u: vault.read("secret/database/users/{}".format(u))["data"]["value"]
+    pw = {u: vault_read(vault, "secret/database/users/{}".format(u), "value")
           for u in users}
     root_user = "postgres"
     print("  - {}".format(root_user))
@@ -110,3 +124,7 @@ def db_set_passwords(container, vault):
                     print("  - {}".format(u))
                     db_set_password(cur, u, p)
         conn.commit()
+
+
+def vault_read(vault, key, field):
+    return vault.read(key)["data"][field]

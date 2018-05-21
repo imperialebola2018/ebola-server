@@ -74,19 +74,23 @@ class Service:
 
     @property
     def reporting_api(self):
-        return self._get("reporting_api")
+        return self._get_container("reporting_api")
 
     @property
     def db(self):
-        return self._get("db")
+        return self._get_container("db")
 
     @property
     def proxy(self):
-        return self._get("proxy")
+        return self._get_container("proxy")
 
     @property
     def orderly(self):
-        return self._get("orderly")
+        return self._get_container("orderly")
+
+    @property
+    def proxy(self):
+        return self._get_container("proxy")
 
     @property
     def db_volume_present(self):
@@ -100,7 +104,7 @@ class Service:
     def network_name(self):
         return "{}_{}".format(self.docker_prefix, self.network)
 
-    def _get(self, name):
+    def _get_container(self, name):
         try:
             return self.client.containers.get(self.container_name(name))
         except docker.errors.NotFound:
