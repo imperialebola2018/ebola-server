@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+import os.path
+
+import docker
+
+def docker_client(cl=None):
+    return cl or docker.client.from_env()
+
+
+def volume_exists(volume_name, cl=None):
+    try:
+        docker_client(cl).volumes.get(volume_name)
+        return True
+    except docker.errors.NotFound:
+        return False
+
+
+def prepare_src(path, remove=False):
+    if not os.path.exists(path):
+        raise Exception("clone '{}' into this directory".format(path))
+    cl = docker_client()
+
+    volume_name = "ebola_server_orderly_volume"
+    if volume_exists(volume_name, cl):
+        print("Volume '{}' already exists".format(volume_name))
+        if remove:
+            print("...deleting!")
+            cl.volumes.get(volume_name).remove()
+        else:
+            return;
+
+    cl.volumes.create(volume_name)
+    cmd = ["ash", "-c", "cd /src; tar cf - . | (cd /dest && tar xf -)"]
+    src = docker.types.Mount(target="/src", source=os.path.abspath(path),
+                             read_only=True, type="bind")
+    dest = docker.types.Mount(target="/dest", source=volume_name)
+
+    print("Copying data")
+    cl.containers.run(image="alpine", command=cmd,
+                      remove=True, mounts=[src, dest])
+    print("Done")
+
+
+if __name__ == "__main__":
+    prepare_src("ebola-outputs", False)
