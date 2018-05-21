@@ -56,6 +56,7 @@ def configure_reporting_api(service):
 
 def configure_orderly(service):
     print("Configuring orderly")
+    docker_exec_run(service.orderly, "orderly rebuild")
     docker_exec_run(service.orderly, "touch /orderly_go")
 
 
