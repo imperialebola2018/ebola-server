@@ -23,9 +23,9 @@ def configure(service):
 
 
 def docker_exec_run(container, command, environment=None, check=True):
-    res = container.exec_run(command, environment=None)
+    res = container.exec_run(command, environment=environment)
     if check and res[0] != 0:
-        raise Exception("command failed with output: " + res[1])
+        raise Exception("command failed with output: " + res[1].decode("UTF-8"))
     return res
 
 
