@@ -20,6 +20,7 @@ def configure(service):
     configure_database(service)
     configure_orderly(service)
     configure_reporting_api(service)
+    configure_proxy(service)
 
 
 def docker_exec_run(container, command, environment=None, check=True):
@@ -75,6 +76,16 @@ def configure_proxy(service):
         vault_read(service.vault, "secret/proxy/ssl_private_key", "value")
     }
     docker_exec_run(service.proxy, "configure_proxy", environment=env)
+
+
+## TODO: far better would be to store the encrypted copy
+def configure_proxy_users(service):
+    vault = service.vault
+    users = vault.list("secret/proxy/users")['data']['keys']
+    for u in users:
+        print("  - {}".format(u))
+        p = vault_read(vault, "secret/proxy/users/{}".format(u), "password")
+        docker_exec_run(service.proxy, ["add_user", u, p])
 
 
 def db_connect(user, password):
