@@ -1,0 +1,51 @@
+version: "2.1"
+
+x-logging: &log-journald
+  driver: journald
+  options:
+    tag: ebola2018
+
+services:
+  db:
+    image: imperialebola2018/ebola-db:latest
+    logging: *log-journald
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_volume:/pgdata
+
+  reporting_api:
+    image: docker.montagu.dide.ic.ac.uk:5000/montagu-reporting-api:ebola
+    restart: always
+    logging: *log-journald
+    volumes:
+      - orderly_volume:/orderly
+    depends_on:
+      - orderly
+    ports:
+      - "8081:8081"
+
+  orderly:
+    image: docker.montagu.dide.ic.ac.uk:5000/montagu-orderly:master
+    restart: always
+    logging: *log-journald
+    volumes:
+      - orderly_volume:/orderly
+    command: --port 8321 --go-signal /orderly_go /orderly
+
+  proxy:
+    image: "imperialebola2018/ebola-proxy:latest"
+    restart: always
+    logging: *log-journald
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - reporting_api
+      - orderly
+      - db
+    command: ["443", "ebola2018.dide.ic.ac.uk"]
+
+volumes:
+  orderly_volume:
+  db_volume:
