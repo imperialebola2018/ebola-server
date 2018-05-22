@@ -77,6 +77,7 @@ def configure_proxy(service):
         vault_read(service.vault, "secret/proxy/ssl_private_key", "value")
     }
     docker_exec_run(service.proxy, "configure_proxy", environment=env)
+    configure_proxy_users(service)
 
 
 ## TODO: far better would be to store the encrypted copy
