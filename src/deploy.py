@@ -7,6 +7,7 @@ import service
 
 def start():
     s = service.Service({})
+    s.pull()
     s.start()
     configure(s)
 
