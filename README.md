@@ -2,9 +2,15 @@
 
 Repurpose vimc's api server to work with the ebola response.  This is a work in progress.
 
+## Prerequisites
+
+* [Docker Community Edition](https://docs.docker.com/engine/installation/)
+* [Docker Compose](https://docs.docker.com/compose/install/) - at least version 0.17.0
+* Python 3 and pip (Python 3 is included with Ubuntu. For pip, use `apt install python3-pip`)
 
 ```
 pip3 install -r requirements.txt
+
 ```
 
 then
