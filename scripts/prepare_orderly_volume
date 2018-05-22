@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
+"""Prepare orderly volume
+
+Usage:
+  prepare_orderly_volume [--remove] [<path>]
+"""
+
 import os.path
 
+import docopt
 import docker
 
 def docker_client(cl=None):
@@ -42,4 +49,7 @@ def prepare_src(path, remove=False):
 
 
 if __name__ == "__main__":
-    prepare_src("ebola-outputs", False)
+    args = docopt.docopt(__doc__)
+    path = args["<path>"] or "ebola-outputs"
+    remove = args["--remove"]
+    prepare_src(path, remove)
