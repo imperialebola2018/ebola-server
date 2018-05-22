@@ -27,7 +27,7 @@ def prepare_src(path, remove=False):
         raise Exception("clone '{}' into this directory".format(path))
     cl = docker_client()
 
-    volume_name = "ebola_server_orderly_volume"
+    volume_name = "ebolaserver_orderly_volume"
     if volume_exists(volume_name, cl):
         print("Volume '{}' already exists".format(volume_name))
         if remove:
