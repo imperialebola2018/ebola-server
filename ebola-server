@@ -35,7 +35,7 @@ def stop(root):
     deploy.stop()
 
 
-def update_passwords(root)
+def update_passwords(root):
     set_root(root)
     import deploy
     import service
