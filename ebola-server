@@ -46,9 +46,9 @@ def update_passwords(root):
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = args["--root"]
-    if args['start']:
+    if args["start"]:
         start(root)
-    elif args['stop']:
+    elif args["stop"]:
         stop(root)
-    elif args['update-passwords']:
+    elif args["update-passwords"]:
         update_passwords(root)
