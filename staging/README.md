@@ -1,0 +1,5 @@
+## Staging
+
+```
+vagrant up
+```
