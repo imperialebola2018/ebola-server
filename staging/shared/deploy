@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+if [ ! -d ebola-server ]; then
+    git clone https://github.com/imperialebola2018/ebola-server
+else
+    git -C ebola-server pull
+fi
+
+sudo pip3 install -r ebola-server/requirements.txt
+
+PATH_OUTPUTS=/vagrant/ebola-outputs
+./ebola-server/scripts/prepare_orderly_volume --remove $PATH_OUTPUTS
+
+./ebola-server/ebola-server start
