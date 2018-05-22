@@ -4,6 +4,7 @@
 Usage:
 ebola-server [--root=ROOT] start
 ebola-server [--root=ROOT] stop
+ebola-server [--root=ROOT] update-passwords
 """
 
 
@@ -34,9 +35,20 @@ def stop(root):
     deploy.stop()
 
 
+def update_passwords(root)
+    set_root(root)
+    import deploy
+    import service
+    s = service.Service({})
+    deploy.configure_proxy_users(s)
+
+
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
+    root = args["--root"]
     if args['start']:
-        start(args["--root"])
+        start(root)
     elif args['stop']:
-        stop(args["--root"])
+        stop(root)
+    elif args['update-passwords']:
+        update_passwords(root)
