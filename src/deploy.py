@@ -84,6 +84,7 @@ def configure_proxy(service):
 def configure_proxy_users(service):
     vault = service.vault
     users = vault.list("secret/proxy/users")['data']['keys']
+    print("Updating passwords for the proxy")
     for u in users:
         print("  - {}".format(u))
         p = vault_read(vault, "secret/proxy/users/{}".format(u), "password")
