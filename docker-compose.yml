@@ -15,7 +15,7 @@ services:
       - db_volume:/pgdata
 
   reporting_api:
-    image: docker.montagu.dide.ic.ac.uk:5000/montagu-reporting-api:ebola
+    image: vimc/montagu-reporting-api:ebola
     restart: always
     logging: *log-journald
     volumes:
@@ -26,7 +26,7 @@ services:
       - "8081:8081"
 
   orderly:
-    image: docker.montagu.dide.ic.ac.uk:5000/montagu-orderly:master
+    image: imperialebola2018/ebola-orderly:latest
     restart: always
     logging: *log-journald
     volumes:
@@ -34,7 +34,7 @@ services:
     command: --port 8321 --go-signal /orderly_go /orderly
 
   proxy:
-    image: "imperialebola2018/ebola-proxy:latest"
+    image: imperialebola2018/ebola-proxy:latest
     restart: always
     logging: *log-journald
     ports:
