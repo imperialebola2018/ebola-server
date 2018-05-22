@@ -28,7 +28,7 @@ class Service:
     def __init__(self, settings):
         self.client = docker.from_env()
         self.settings = dict(settings)
-        self.docker_prefix = "ebola_server"
+        self.docker_prefix = "ebolaserver"
         self.settings['docker_prefix'] = self.docker_prefix
         self.containers = components['containers'].copy()
         self.volumes = components['volumes'].copy()
