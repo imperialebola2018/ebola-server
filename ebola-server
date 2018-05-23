@@ -4,6 +4,7 @@
 Usage:
 ebola-server [--root=ROOT] start
 ebola-server [--root=ROOT] stop
+ebola-server [--root=ROOT] configure
 ebola-server [--root=ROOT] update-passwords
 """
 
@@ -33,6 +34,13 @@ def stop(root):
     set_root(root)
     import deploy
     deploy.stop()
+
+
+def configure(root):
+    set_root(root)
+    import deploy
+    s = deploy.service.Service({})
+    deploy.configure(s)
 
 
 def update_passwords(root):
