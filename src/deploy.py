@@ -24,10 +24,13 @@ def configure(service):
     configure_proxy(service)
 
 
-def docker_exec_run(container, command, environment=None, check=True):
+def docker_exec_run(container, command, environment=None, check=True,
+                    verbose=False):
     res = container.exec_run(command, environment=environment)
     if check and res[0] != 0:
         raise Exception("command failed with output: " + res[1].decode("UTF-8"))
+    if verbose:
+        print(res[1].decode("UTF-8"))
     return res
 
 
@@ -57,9 +60,9 @@ def configure_reporting_api(service):
 
 def configure_orderly(service):
     print("Configuring orderly")
-    cmd = ["/orderly/scripts/configure", "/orderly", service.vault.token,
-           "/orderly_go"]
-    docker_exec_run(service.orderly, cmd)
+    token = service.vault.token
+    cmd = ["/orderly/scripts/configure", "/orderly", token, "/orderly_go"]
+    docker_exec_run(service.orderly, cmd, verbose=True)
 
 
 def configure_database(service):
@@ -78,7 +81,8 @@ def configure_proxy(service):
         "SSL_PRIVATE_KEY":
         vault_read(service.vault, "secret/proxy/ssl_private_key", "value")
     }
-    docker_exec_run(service.proxy, "configure_proxy", environment=env)
+    docker_exec_run(service.proxy, "configure_proxy", environment=env,
+                    verbose=True)
     configure_proxy_users(service)
 
 
