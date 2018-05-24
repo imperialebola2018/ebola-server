@@ -28,7 +28,8 @@ def docker_exec_run(container, command, environment=None, check=True,
                     verbose=False):
     res = container.exec_run(command, environment=environment)
     if check and res[0] != 0:
-        raise Exception("command failed with output: " + res[1].decode("UTF-8"))
+        raise Exception("command failed with output: " +
+                        res[1].decode("UTF-8"))
     if verbose:
         print(res[1].decode("UTF-8"))
     return res
@@ -50,9 +51,7 @@ def configure_reporting_api(service):
     print("- Setting Orderly volume location")
     add_property(container, config_path, "orderly.root", "/orderly/")
 
-    # print("- Injecting public key for token verification into container")
-    # docker_exec_run(container, "mkdir -p " + join(config_path, "token_key"))
-    # docker_cp(keypair_paths['public'], container.name, join(config_path, "token_key/public_key.der"))
+    # NOTE: in montagu the public key is added here
 
     print("- Sending go signal to reporting API")
     docker_exec_run(container, "touch {}/go_signal".format(config_path))
@@ -86,7 +85,7 @@ def configure_proxy(service):
     configure_proxy_users(service)
 
 
-## TODO: far better would be to store the encrypted copy
+# TODO: far better would be to store the encrypted copy
 def configure_proxy_users(service):
     vault = service.vault
     users = vault.list("secret/proxy/users")['data']['keys']

@@ -20,4 +20,5 @@ def run(args, settings):
     p = Popen(cmd, shell=True)
     p.wait()
     if p.returncode != 0:
-        raise Exception("An error occurred: docker-compose returned {}".format(p.returncode))
+        raise Exception("An error occurred: docker-compose returned {}".format(
+            p.returncode))

@@ -48,11 +48,13 @@ class Service:
     @property
     def status(self):
         expected = self.container_names
-        actual = dict((c.name, c) for c in self.client.containers.list(all=True))
+        actual = dict((c.name, c)
+                      for c in self.client.containers.list(all=True))
         unexpected = list(x for x in actual.keys() - expected
                           if x.startswith(self.docker_prefix + "_"))
         if any(unexpected):
-            raise Exception("There are unexpected containers running: {}".format(unexpected))
+            raise Exception("Unexpected containers running: {}".format(
+                unexpected))
 
         services = list(c for c in actual.values() if c.name in expected)
         statuses = set(c.status for c in services)
@@ -63,8 +65,10 @@ class Service:
             return None
         else:
             status_map = dict((c.name, c.status) for c in services)
-            raise Exception("service is in a indeterminate state. "
-                            "Manual intervention is required.\nStatus: {}".format(status_map))
+            raise Exception(
+                "service is in a indeterminate state. "
+                "Manual intervention is required.\nStatus: {}".format(
+                    status_map))
 
     def container_name(self, name):
         return "{}_{}_1".format(self.docker_prefix, self.containers[name])
@@ -139,7 +143,8 @@ class Service:
         print("- Checking we have started successfully")
         time.sleep(2)
         if self.status != "running":
-            raise Exception("Failed to start. Service status is {}".format(self.status))
+            raise Exception("Failed to start. Service status is {}".format(
+                self.status))
 
 
 def get_vault():
