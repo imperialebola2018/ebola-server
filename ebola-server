@@ -19,33 +19,24 @@ import docopt
 def set_root(root):
     root = os.path.abspath(root or os.path.dirname(sys.argv[0]))
     src = root + "/src"
-    print("root = {}, src = {}".format(root, src))
     os.chdir(src)
     sys.path.insert(1, src)
 
 
-def start(root):
-    set_root(root)
-    import deploy
+def start():
     deploy.start()
 
 
-def stop(root):
-    set_root(root)
-    import deploy
+def stop():
     deploy.stop()
 
 
-def configure(root):
-    set_root(root)
-    import deploy
+def configure():
     s = deploy.service.Service({})
     deploy.configure(s)
 
 
-def update_passwords(root):
-    set_root(root)
-    import deploy
+def update_passwords():
     s = deploy.service.Service({})
     deploy.configure_proxy_users(s)
 
@@ -53,11 +44,15 @@ def update_passwords(root):
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = args["--root"]
+
+    set_root(root)
+    import deploy
+
     if args["start"]:
-        start(root)
+        start()
     elif args["stop"]:
-        stop(root)
+        stop()
     elif args["update-passwords"]:
-        update_passwords(root)
+        update_passwords()
     elif args["configure"]:
-        configure(root)
+        configure()
