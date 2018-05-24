@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -26,14 +27,33 @@ components = {
 
 class Service:
     def __init__(self, settings):
-        self.client = docker.from_env()
-        self.settings = dict(settings)
         self.docker_prefix = "ebolaserver"
+
+        self._validate_settings(settings)
+        self.settings = settings
+        # This one is not configurable but will be used
         self.settings['docker_prefix'] = self.docker_prefix
+
+        self.client = docker.from_env()
         self.containers = components['containers'].copy()
         self.volumes = components['volumes'].copy()
         self.network = components['network']
         self._vault = None
+
+    @staticmethod
+    def from_configuration(path):
+        with open(path) as f:
+            settings = json.load(f)
+        return Service(settings)
+
+    def _validate_settings(self, settings):
+        expected = ["proxy_port"]
+        msg = set(settings.keys()) - set(expected)
+        if msg:
+            raise Exception("Missing keys: {}".format(", ".join(msg)))
+        extra = set(expected) - set(settings.keys())
+        if extra:
+            raise Exception("Unknown keys: {}".format(", ".join(extra)))
 
     @property
     def vault(self):

@@ -2,6 +2,7 @@
 """Start the ebola server
 
 Usage:
+ebola-server [--root=ROOT] set-configuration <name>
 ebola-server [--root=ROOT] start
 ebola-server [--root=ROOT] stop
 ebola-server [--root=ROOT] configure
@@ -16,34 +17,46 @@ import sys
 
 import docopt
 
+CONFIG_FILE = "conf/default.json"
+
+
+def set_configuration(name):
+    print("Setting configuration to: {}".format(name))
+    dest = "{}.json".format(name)
+    dest_full = os.path.join("conf", dest)
+    if not os.path.exists(dest_full):
+        raise Exception("Configuration does not exist: " + dest_full)
+    if os.path.exists(CONFIG_FILE):
+        os.remove(CONFIG_FILE)
+    os.symlink(dest, CONFIG_FILE)
+    print("...OK")
+
 
 def set_root(root):
     root = os.path.abspath(root or os.path.dirname(sys.argv[0]))
-    src = root + "/src"
-    os.chdir(src)
-    sys.path.insert(1, src)
+    sys.path.insert(1, root + "/src")
 
 
-def start():
-    deploy.start()
+def start(name):
+    deploy.start(CONFIG_FILE)
 
 
 def stop():
-    deploy.stop()
+    deploy.stop(CONFIG_FILE)
 
 
 def configure():
-    s = deploy.service.Service({})
+    s = deploy.get_service(CONFIG_FILE)
     deploy.configure(s)
 
 
 def update_passwords():
-    s = deploy.service.Service({})
+    s = deploy.get_service(CONFIG_FILE)
     deploy.configure_proxy_users(s)
 
 
 def status():
-    s = deploy.service.Service({})
+    s = deploy.get_service(CONFIG_FILE)
     st = s.status
     print(st if st else "not running")
 
@@ -55,13 +68,19 @@ if __name__ == "__main__":
     set_root(root)
     import deploy
 
-    if args["start"]:
-        start()
-    elif args["stop"]:
-        stop()
-    elif args["update-passwords"]:
-        update_passwords()
-    elif args["configure"]:
-        configure()
-    elif args["status"]:
-        status()
+    if args["set-configuration"]:
+        set_configuration(args["<name>"])
+    else:
+        if not os.path.exists(CONFIG_FILE):
+            sys.exit("ERROR: Set a configuration with set_configuration first")
+
+        if args["start"]:
+            start(args)
+        elif args["stop"]:
+            stop()
+        elif args["update-passwords"]:
+            update_passwords()
+        elif args["configure"]:
+            configure()
+        elif args["status"]:
+            status()

@@ -5,15 +5,19 @@ import psycopg2
 import service
 
 
-def start():
-    s = service.Service({})
+def get_service(path_config):
+    return service.Service.from_configuration(path_config)
+
+
+def start(path_config):
+    s = get_service(path_config)
     s.pull()
     s.start()
     configure(s)
 
 
-def stop():
-    s = service.Service({})
+def stop(path_config):
+    s = get_service(path_config)
     s.stop()
 
 
