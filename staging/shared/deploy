@@ -11,8 +11,9 @@ pip3 install -r ebola-server/requirements.txt
 if [ ! -f /vagrant/.vault_token ]; then
     echo "Please run scripts/vault-login"
 fi
-cp /vagrant/vault_token ebola-server
+cp /vagrant/.vault_token ebola-server
 
 ./ebola-server/ebola-server set-configuration staging
+./ebola-server/ebola-server vault-login
 ./ebola-server/ebola-server create-orderly-volume /vagrant/ebola-outputs
 ./ebola-server/ebola-server start

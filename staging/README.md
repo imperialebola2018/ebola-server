@@ -28,6 +28,13 @@ Login to the vault and arrage credentials
 cp ../.vault_token shared
 ```
 
+Get a copy of the current outputs (*this is going to change*)
+
+```
+git clone git@github.com:imperialebola2018/ebola-outputs shared/ebola-outputs
+git -C shared/ebola-outputs checkout minimontagu
+```
+
 then
 
 ```
