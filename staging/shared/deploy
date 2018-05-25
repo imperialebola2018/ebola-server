@@ -8,6 +8,11 @@ fi
 
 sudo pip3 install -r ebola-server/requirements.txt
 
+if [ ! -f /vagrant/vault_token ]; then
+    echo "Please run scripts/vault-login"
+fi
+export VAULT_TOKEN=$(cat /vagrant/vault_token)
+
 PATH_OUTPUTS=/vagrant/ebola-outputs
 ./ebola-server/scripts/prepare_orderly_volume --remove $PATH_OUTPUTS
 
