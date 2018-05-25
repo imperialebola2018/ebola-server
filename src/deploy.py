@@ -70,6 +70,7 @@ def configure_orderly(service):
 
 def configure_database(service):
     print("Configuring database")
+    db_wait(service.db)
     db_set_passwords(service.db, service.vault)
 
 
@@ -98,6 +99,12 @@ def configure_proxy_users(service):
         print("  - {}".format(u))
         p = vault_read(vault, "secret/proxy/users/{}".format(u), "password")
         docker_exec_run(service.proxy, ["add_user", u, p])
+
+
+def db_wait(container):
+    print("Waiting for the db to come online")
+    docker_exec_run(container, "db-wait")
+    print("..OK")
 
 
 def db_connect(user, password):
