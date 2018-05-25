@@ -89,7 +89,6 @@ def export_orderly_volume(root, path, verbose):
 def load_vault_token(root):
     path_vault_token = os.path.join(root, VAULT_TOKEN)
     if os.path.exists(path_vault_token):
-        print("Loading vault token from {}".format(path_vault_token))
         with open(path_vault_token, "r") as f:
             os.environ["VAULT_TOKEN"] = f.read().strip()
 
