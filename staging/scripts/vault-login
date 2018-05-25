@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+ROOT=$(dirname $(dirname $(realpath $0)))
 export VAULT_ADDR='https://ebola2018.dide.ic.ac.uk:8200'
 if [ "$VAULT_AUTH_GITHUB_TOKEN" = "" ]; then
     echo -n "Please provide your GitHub personal access token for the vault: "
-    read -s token
+    read -s TOKEN
     echo ""
-    export VAULT_AUTH_GITHUB_TOKEN=${token}
+    export VAULT_AUTH_GITHUB_TOKEN=${TOKEN}
 fi
-env | grep -E '^(VAULT_ADDR|VAULT_AUTH_GITHUB_TOKEN)' > shared/vault_config
+vault login -method=github -no-store -token-only > ${ROOT}/shared/vault_token
