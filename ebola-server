@@ -37,26 +37,26 @@ def set_configuration(root, name):
     print("...OK")
 
 
-def start(root, name):
-    deploy.start(os.path.join(root, CONFIG_FILE))
+def start():
+    deploy.start(CONFIG_FILE)
 
 
-def stop(root):
-    deploy.stop(os.path.join(root, CONFIG_FILE))
+def stop():
+    deploy.stop(CONFIG_FILE)
 
 
-def configure(root):
-    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+def configure():
+    s = deploy.get_service(CONFIG_FILE)
     deploy.configure(s)
 
 
-def update_passwords(root):
-    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+def update_passwords():
+    s = deploy.get_service(CONFIG_FILE)
     deploy.configure_proxy_users(s)
 
 
-def status(root):
-    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+def status():
+    s = deploy.get_service(CONFIG_FILE)
     st = s.status
     print(st if st else "not running")
 
@@ -86,6 +86,12 @@ def load_vault_token(root):
             os.environ["VAULT_TOKEN"] = f.read().strip()
 
 
+def require_config(root):
+    if not os.path.exists(os.path.join(root, CONFIG_FILE)):
+        sys.exit("ERROR: Set a configuration with set-configuration first")
+    load_vault_token(root)
+
+
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = os.path.dirname(sys.argv[0])
@@ -97,22 +103,21 @@ if __name__ == "__main__":
         set_configuration(root, args["<name>"])
     elif args["vault-login"]:
         vault_login(root, args["--refresh"])
+    elif args["create-orderly-volume"]:
+        require_config(root)
+        create_orderly_volume(root, args["<path>"], args["--remove"])
     else:
-        if not os.path.exists(os.path.join(root, CONFIG_FILE)):
-            sys.exit("ERROR: Set a configuration with set-configuration first")
-
+        require_config(root)
+        os.chdir(root)
         if args["start"]:
-            load_vault_token(root)
-            start(root, args)
+            start()
         elif args["stop"]:
-            stop(root)
+            stop()
         elif args["update-passwords"]:
-            load_vault_token(root)
-            update_passwords(root)
+            update_passwords()
         elif args["configure"]:
-            load_vault_token(root)
-            configure(root)
+            configure()
         elif args["status"]:
-            status(root)
-        elif args["create-orderly-volume"]:
-            create_orderly_volume(root, args["<path>"], args["--remove"])
+            status()
+        else:
+            raise Exception("Unknown command")
