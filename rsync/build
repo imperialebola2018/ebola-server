@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+HERE=$(dirname $(realpath $0))
+IMAGE=imperialebola2018/rsync
+docker build --rm -t $IMAGE $HERE
+docker push $IMAGE
