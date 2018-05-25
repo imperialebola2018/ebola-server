@@ -21,6 +21,15 @@ sudo dpkg --install vagrant_2.1.1_x86_64.deb
 
 ### Getting going
 
+Login to the vault and arrage credentials
+
+```
+../scripts/vault-login
+cp ../.vault_token shared
+```
+
+then
+
 ```
 vagrant up
 vagrant ssh -c 'sudo mount /mnt/ebola2018'

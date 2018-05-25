@@ -61,6 +61,17 @@ def status():
     print(st if st else "not running")
 
 
+def load_vault_token(root):
+    if root:
+        path_vault_token = os.path.join(root, ".vault_token")
+    else:
+        path_vault_token = ".vault_token"
+    if os.path.exists(path_vault_token):
+        print("Loading vault token from {}".format(path_vault_token))
+        with open(path_vault_token, "r") as f:
+            os.environ["VAULT_TOKEN"] = f.read().strip()
+
+
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = args["--root"]
@@ -72,15 +83,18 @@ if __name__ == "__main__":
         set_configuration(args["<name>"])
     else:
         if not os.path.exists(CONFIG_FILE):
-            sys.exit("ERROR: Set a configuration with set_configuration first")
+            sys.exit("ERROR: Set a configuration with set-configuration first")
 
         if args["start"]:
+            load_vault_token(root)
             start(args)
         elif args["stop"]:
             stop()
         elif args["update-passwords"]:
+            load_vault_token(root)
             update_passwords()
         elif args["configure"]:
+            load_vault_token(root)
             configure()
         elif args["status"]:
             status()
