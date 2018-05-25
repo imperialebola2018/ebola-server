@@ -6,9 +6,9 @@ else
     git -C ebola-server pull
 fi
 
-sudo pip3 install -r ebola-server/requirements.txt
+pip3 install -r ebola-server/requirements.txt
 
-if [ ! -f /vagrant/vault_token ]; then
+if [ ! -f /vagrant/.vault_token ]; then
     echo "Please run scripts/vault-login"
 fi
 cp /vagrant/vault_token ebola-server
