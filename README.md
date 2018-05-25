@@ -19,7 +19,7 @@ then
 ./scripts/generate_passwords
 ./ebola-server set-configuration production
 ./ebola-server vault-login
-./ebola-server create-orderly-volume ebola-outputs
+./ebola-server import-orderly-volume ebola-outputs
 ./ebola-server start
 ```
 

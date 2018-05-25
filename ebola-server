@@ -4,7 +4,8 @@
 Usage:
 ebola-server set-configuration <name>
 ebola-server vault-login [--refresh]
-ebola-server create-orderly-volume [--remove] <path>
+ebola-server import-orderly-volume [--remove] <path>
+ebola-server export-orderly-volume [--verbose] <path>
 ebola-server start
 ebola-server stop
 ebola-server configure
@@ -71,11 +72,18 @@ def vault_login(root, refresh):
         f.write(vault.token)
 
 
-def create_orderly_volume(root, path, remove):
+def import_orderly_volume(root, path, remove):
     import util
     s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     dest = s.volume_name("orderly")
     util.directory_to_volume(path, dest, s.client, remove)
+
+
+def export_orderly_volume(root, path, verbose):
+    import util
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+    src = s.volume_name("orderly")
+    util.volume_to_directory(src, path, s.client, verbose)
 
 
 def load_vault_token(root):
@@ -103,9 +111,12 @@ if __name__ == "__main__":
         set_configuration(root, args["<name>"])
     elif args["vault-login"]:
         vault_login(root, args["--refresh"])
-    elif args["create-orderly-volume"]:
+    elif args["import-orderly-volume"]:
         require_config(root)
-        create_orderly_volume(root, args["<path>"], args["--remove"])
+        import_orderly_volume(root, args["<path>"], args["--remove"])
+    elif args["export-orderly-volume"]:
+        require_config(root)
+        export_orderly_volume(root, args["<path>"], args["--verbose"])
     else:
         require_config(root)
         os.chdir(root)
