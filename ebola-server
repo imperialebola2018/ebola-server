@@ -4,7 +4,7 @@
 Usage:
 ebola-server set-configuration <name>
 ebola-server vault-login [--refresh]
-ebola-server import-orderly-volume [--remove] <path>
+ebola-server import-orderly-volume [--verbose] [--remove] [--update] <path>
 ebola-server export-orderly-volume [--verbose] <path>
 ebola-server start
 ebola-server stop
@@ -72,11 +72,11 @@ def vault_login(root, refresh):
         f.write(vault.token)
 
 
-def import_orderly_volume(root, path, remove):
+def import_orderly_volume(root, path, verbose, remove, update):
     import util
     s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     dest = s.volume_name("orderly")
-    util.directory_to_volume(path, dest, s.client, remove)
+    util.directory_to_volume(path, dest, s.client, verbose, remove, update)
 
 
 def export_orderly_volume(root, path, verbose):
@@ -113,7 +113,8 @@ if __name__ == "__main__":
         vault_login(root, args["--refresh"])
     elif args["import-orderly-volume"]:
         require_config(root)
-        import_orderly_volume(root, args["<path>"], args["--remove"])
+        import_orderly_volume(root, args["<path>"], args["--verbose"],
+                              args["--remove"], args["--update"])
     elif args["export-orderly-volume"]:
         require_config(root)
         export_orderly_volume(root, args["<path>"], args["--verbose"])
