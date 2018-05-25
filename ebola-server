@@ -27,11 +27,13 @@ def set_configuration(root, name):
     print("Setting configuration to: {}".format(name))
     dest = "{}.json".format(name)
     dest_full = os.path.join(root, "conf", dest)
+    config_full = os.path.join(root, CONFIG_FILE)
     if not os.path.exists(dest_full):
         raise Exception("Configuration does not exist: " + dest_full)
-    if os.path.exists(CONFIG_FILE):
-        os.remove(CONFIG_FILE)
-    os.symlink(dest, CONFIG_FILE)
+    if os.path.exists(config_full):
+        print("...removing previous configuration")
+        os.remove(config_full)
+    os.symlink(dest, config_full)
     print("...OK")
 
 
