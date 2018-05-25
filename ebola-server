@@ -2,12 +2,13 @@
 """Start the ebola server
 
 Usage:
-ebola-server [--root=ROOT] set-configuration <name>
-ebola-server [--root=ROOT] start
-ebola-server [--root=ROOT] stop
-ebola-server [--root=ROOT] configure
-ebola-server [--root=ROOT] update-passwords
-ebola-server [--root=ROOT] status
+ebola-server set-configuration <name>
+ebola-server vault-login [--refresh]
+ebola-server start
+ebola-server stop
+ebola-server configure
+ebola-server update-passwords
+ebola-server status
 """
 
 
@@ -18,12 +19,13 @@ import sys
 import docopt
 
 CONFIG_FILE = "conf/default.json"
+VAULT_TOKEN = ".vault_token"
 
 
-def set_configuration(name):
+def set_configuration(root, name):
     print("Setting configuration to: {}".format(name))
     dest = "{}.json".format(name)
-    dest_full = os.path.join("conf", dest)
+    dest_full = os.path.join(root, "conf", dest)
     if not os.path.exists(dest_full):
         raise Exception("Configuration does not exist: " + dest_full)
     if os.path.exists(CONFIG_FILE):
@@ -32,40 +34,42 @@ def set_configuration(name):
     print("...OK")
 
 
-def set_root(root):
-    root = os.path.abspath(root or os.path.dirname(sys.argv[0]))
-    sys.path.insert(1, root + "/src")
+def start(root, name):
+    deploy.start(os.path.join(root, CONFIG_FILE))
 
 
-def start(name):
-    deploy.start(CONFIG_FILE)
+def stop(root):
+    deploy.stop(os.path.join(root, CONFIG_FILE))
 
 
-def stop():
-    deploy.stop(CONFIG_FILE)
-
-
-def configure():
-    s = deploy.get_service(CONFIG_FILE)
+def configure(root):
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     deploy.configure(s)
 
 
-def update_passwords():
-    s = deploy.get_service(CONFIG_FILE)
+def update_passwords(root):
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     deploy.configure_proxy_users(s)
 
 
-def status():
-    s = deploy.get_service(CONFIG_FILE)
+def status(root):
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     st = s.status
     print(st if st else "not running")
 
 
+def vault_login(root, refresh):
+    import service
+    load_vault_token(root)
+    vault = service.get_vault(refresh)
+    path_vault_token = os.path.join(root, VAULT_TOKEN)
+    print("Saving vault token to {}".format(path_vault_token))
+    with open(path_vault_token, "w") as f:
+        f.write(vault.token)
+
+
 def load_vault_token(root):
-    if root:
-        path_vault_token = os.path.join(root, ".vault_token")
-    else:
-        path_vault_token = ".vault_token"
+    path_vault_token = os.path.join(root, VAULT_TOKEN)
     if os.path.exists(path_vault_token):
         print("Loading vault token from {}".format(path_vault_token))
         with open(path_vault_token, "r") as f:
@@ -74,27 +78,29 @@ def load_vault_token(root):
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
-    root = args["--root"]
+    root = os.path.dirname(sys.argv[0])
 
-    set_root(root)
+    sys.path.insert(1, os.path.join(root, "src"))
     import deploy
 
     if args["set-configuration"]:
-        set_configuration(args["<name>"])
+        set_configuration(root, args["<name>"])
+    elif args["vault-login"]:
+        vault_login(root, args["--refresh"])
     else:
         if not os.path.exists(CONFIG_FILE):
             sys.exit("ERROR: Set a configuration with set-configuration first")
 
         if args["start"]:
             load_vault_token(root)
-            start(args)
+            start(root, args)
         elif args["stop"]:
-            stop()
+            stop(root)
         elif args["update-passwords"]:
             load_vault_token(root)
-            update_passwords()
+            update_passwords(root)
         elif args["configure"]:
             load_vault_token(root)
-            configure()
+            configure(root)
         elif args["status"]:
-            status()
+            status(root)

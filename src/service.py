@@ -167,21 +167,22 @@ class Service:
                 self.status))
 
 
-def get_vault():
+def get_vault(refresh=False):
     print("Connecting to the vault")
     # First try and login using a vault token.  That might fail
     # because the token is not present *or* because it has expired.
     # So we'll just pass and continue with more involved methods if
     # anything fails.
     vault_addr = "https://ebola2018.dide.ic.ac.uk:8200"
-    try:
-        token = os.environ['VAULT_TOKEN']
-        print("...using local token")
-        vault = hvac.Client(url=vault_addr, token=token)
-        if vault.is_authenticated():
-            return vault
-    except:
-        pass
+    if not refresh:
+        try:
+            token = os.environ['VAULT_TOKEN']
+            print("...using local token")
+            vault = hvac.Client(url=vault_addr, token=token)
+            if vault.is_authenticated():
+                return vault
+        except:
+            pass
     try:
         token = os.environ['VAULT_AUTH_GITHUB_TOKEN']
     except KeyError:

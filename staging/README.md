@@ -24,7 +24,7 @@ sudo dpkg --install vagrant_2.1.1_x86_64.deb
 Login to the vault and arrage credentials
 
 ```
-../scripts/vault-login
+../ebola-server vault-login
 cp ../.vault_token shared
 ```
 
