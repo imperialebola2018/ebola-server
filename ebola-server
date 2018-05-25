@@ -98,7 +98,7 @@ if __name__ == "__main__":
     elif args["vault-login"]:
         vault_login(root, args["--refresh"])
     else:
-        if not os.path.exists(CONFIG_FILE):
+        if not os.path.exists(os.path.join(root, CONFIG_FILE)):
             sys.exit("ERROR: Set a configuration with set-configuration first")
 
         if args["start"]:
