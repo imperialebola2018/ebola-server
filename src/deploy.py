@@ -127,7 +127,7 @@ def db_set_password(db, user, password):
 
 
 def db_set_passwords(container, vault):
-    print("Setting database passwords")
+    print("Setting database root password")
     users = vault.list("secret/database/users")["data"]["keys"]
     pw = {u: vault_read(vault, "secret/database/users/{}".format(u), "value")
           for u in users}
@@ -136,17 +136,20 @@ def db_set_passwords(container, vault):
     res = docker_exec_run(container, ["db-set-root-password", pw[root_user]])
 
     # This seems to take a few seconds to let us in
+    print("Waiting for password change to take effect")
     for i in range(10):
         ok = False
         try:
             with db_connect(root_user, pw[root_user]) as conn:
                 ok = True
         except psycopg2.OperationalError:
-            print("...waiting")
+            print(".", end="", flush=True)
             time.sleep(1)
     if not ok:
         raise Exception("did not get database up properly")
+    print("..OK")
 
+    print("Setting database user passwords")
     with db_connect(root_user, pw[root_user]) as conn:
         with conn.cursor() as cur:
             for u, p in pw.items():
