@@ -21,14 +21,16 @@ sudo dpkg --install vagrant_2.1.1_x86_64.deb
 
 ### Getting going
 
-Login to the vault and arrage credentials
+On the _host_ machine (ebola2018.dide.ic.ac.uk), run the following commands.
+
+First, login to the vault and arrage credentials
 
 ```
 ../ebola-server vault-login
 cp ../.vault_token shared
 ```
 
-Get a copy of the current outputs (*this is going to change*)
+Then get a copy of the current outputs (*this is going to change as soon as we have a canonical copy*)
 
 ```
 git clone git@github.com:imperialebola2018/ebola-outputs shared/ebola-outputs
@@ -42,3 +44,5 @@ vagrant up
 vagrant ssh -c 'sudo mount /mnt/ebola2018'
 vagrant ssh -c /vagrant/deploy
 ```
+
+After a while you should be able to log into https://ebola2018.dide.ic.ac.uk:1443

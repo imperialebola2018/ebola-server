@@ -23,10 +23,9 @@ then
 ./ebola-server start
 ```
 
-
 ### Images
 
-Some work needed to prepare images:
+Some work needed to prepare images, and none of this is automated yet
 
 Republish base image for building the orderly server:
 
