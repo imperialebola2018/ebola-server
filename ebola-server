@@ -4,6 +4,7 @@
 Usage:
 ebola-server set-configuration <name>
 ebola-server vault-login [--refresh]
+ebola-server create-orderly-volume [--remove] <path>
 ebola-server start
 ebola-server stop
 ebola-server configure
@@ -68,6 +69,13 @@ def vault_login(root, refresh):
         f.write(vault.token)
 
 
+def create_orderly_volume(root, path, remove):
+    import util
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+    dest = s.volume_name("orderly")
+    util.directory_to_volume(path, dest, s.client, remove)
+
+
 def load_vault_token(root):
     path_vault_token = os.path.join(root, VAULT_TOKEN)
     if os.path.exists(path_vault_token):
@@ -104,3 +112,5 @@ if __name__ == "__main__":
             configure(root)
         elif args["status"]:
             status(root)
+        elif args["create-orderly-volume"]:
+            create_orderly_volume(root, args["<path>"], args["--remove"])

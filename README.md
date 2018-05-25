@@ -16,8 +16,10 @@ pip3 install -r requirements.txt
 then
 
 ```
-./scripts/prepare_orderly_volume ebola-outputs
 ./scripts/generate_passwords
+./ebola-server set-configuration production
+./ebola-server vault-login
+./ebola-server create-orderly-volume ebola-outputs
 ./ebola-server start
 ```
 

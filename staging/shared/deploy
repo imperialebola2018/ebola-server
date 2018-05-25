@@ -13,6 +13,6 @@ if [ ! -f /vagrant/vault_token ]; then
 fi
 cp /vagrant/vault_token ebola-server
 
-./ebola-server/scripts/prepare_orderly_volume --remove /vagrant/ebola-outputs
-
+./ebola-server/ebola-server set-configuration staging
+./ebola-server/ebola-server create-orderly-volume /vagrant/ebola-outputs
 ./ebola-server/ebola-server start
