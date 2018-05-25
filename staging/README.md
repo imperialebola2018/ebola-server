@@ -23,6 +23,11 @@ sudo dpkg --install vagrant_2.1.1_x86_64.deb
 
 On the _host_ machine (ebola2018.dide.ic.ac.uk), run the following commands.
 
+```
+git clone https://github.com/imperialebola2018/ebola-server/staging staging
+cd staging/staging
+```
+
 First, login to the vault and arrage credentials
 
 ```
