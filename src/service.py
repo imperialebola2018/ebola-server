@@ -169,8 +169,26 @@ class Service:
 
 def get_vault():
     print("Connecting to the vault")
-    vault = hvac.Client(url='https://ebola2018.dide.ic.ac.uk:8200')
-    vault.auth_github(os.environ['VAULT_AUTH_GITHUB_TOKEN'])
+    # First try and login using a vault token.  That might fail
+    # because the token is not present *or* because it has expired.
+    # So we'll just pass and continue with more involved methods if
+    # anything fails.
+    vault_addr = "https://ebola2018.dide.ic.ac.uk:8200"
+    try:
+        token = os.environ['VAULT_TOKEN']
+        print("...using local token")
+        vault = hvac.Client(url=vault_addr, token=token)
+        if vault.is_authenticated():
+            return vault
+    except:
+        pass
+    try:
+        token = os.environ['VAULT_AUTH_GITHUB_TOKEN']
+    except KeyError:
+        token = input("Enter your github token: ").strip()
+    print("...using github token")
+    vault = hvac.Client(url=vault_addr)
+    vault.auth_github(token)
     return vault
 
 
