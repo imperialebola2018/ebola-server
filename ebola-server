@@ -12,6 +12,7 @@ ebola-server configure
 ebola-server update-passwords
 ebola-server status
 ebola-server backup [--verbose] <path>
+ebola-server restore [--verbose] <path>
 """
 
 
@@ -119,6 +120,23 @@ def backup(root, path, verbose):
         print("...OK")
 
 
+def restore(root, path, verbose):
+    import util
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+    if s.status:
+        raise Exception("Service must be stopped!")
+    path_orderly_tar = os.path.join(path, "orderly.tar.gz")
+    path_db_tar = os.path.join(path, "db.tar.gz")
+    if not os.path.exists(path_orderly_tar):
+        raise Exception("Expected file '{}'".format(path_orderly_tar))
+    if not os.path.exists(path_db_tar):
+        raise Exception("Expected file '{}'".format(path_db_tar))
+    util.volume_import(path_orderly_tar, s.volume_name("orderly"),
+                       s.client, verbose, True, False)
+    util.volume_import(path_db_tar, s.volume_name("db"),
+                       s.client, verbose, True, False)
+
+
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = os.path.dirname(sys.argv[0])
@@ -140,6 +158,9 @@ if __name__ == "__main__":
     elif args["backup"]:
         require_config(root)
         backup(root, args["<path>"], args["--verbose"])
+    elif args["restore"]:
+        require_config(root)
+        restore(root, args["<path>"], args["--verbose"])
     else:
         require_config(root)
         os.chdir(root)
