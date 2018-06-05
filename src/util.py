@@ -82,14 +82,13 @@ def volume_to_archive(src, dest, compression, client, verbose):
     if not volume_exists(src, client):
         raise Exception("Volume '{}' does not exist".format(src))
 
+    flags = "-{}cvf".format(tar_compression_flag(compression))
     if compression:
         target = "/dest.tar.{}".format(compression)
-        flags = "-{}cvf".format({"gz": "z", "bz2": "j"}[compression])
     else:
         target = "/dest.tar"
-        flags = "-cvf"
 
-    cmd = ["tar", flags, target, "/src/"]
+    cmd = ["tar", "-C", "/src", flags, target, "."]
 
     # Create the file so that we get reasonable permissions:
     with open(dest, "wb") as f:
@@ -105,3 +104,10 @@ def volume_to_archive(src, dest, compression, client, verbose):
     if verbose:
         print(res.decode("UTF-8"))
     print("Done")
+
+
+def tar_compression_flag(ext):
+    if ext:
+        return {"gz": "z", "bz2": "j"}[ext]
+    else:
+        return ""
