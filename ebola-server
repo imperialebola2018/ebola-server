@@ -77,7 +77,7 @@ def import_orderly_volume(root, path, verbose, remove, update):
     import util
     s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     dest = s.volume_name("orderly")
-    util.directory_to_volume(path, dest, s.client, verbose, remove, update)
+    util.volume_import(path, dest, s.client, verbose, remove, update)
 
 
 def export_orderly_volume(root, path, verbose):

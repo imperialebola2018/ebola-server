@@ -14,6 +14,16 @@ def volume_exists(volume_name, client):
         return False
 
 
+def volume_import(src, dest, client, verbose, remove=False, update=False):
+    # This is possibly a bit magic, not sure:
+    re_tar = re.compile(r"\.tar(\.(gz|bz2))?$")
+    m = re_tar.search(src)
+    if m:
+        archive_to_volume(src, dest, m.groups()[1], client, verbose, remove)
+    else:
+        directory_to_volume(src, dest, client, verbose, remove, update)
+
+
 def directory_to_volume(src, dest, client, verbose, remove=False, update=False):
     if not os.path.exists(src):
         raise Exception("Source '{}' does not exist".format(src))
@@ -35,6 +45,39 @@ def directory_to_volume(src, dest, client, verbose, remove=False, update=False):
     dest = docker.types.Mount(target="/dest", source=dest)
 
     print("Importing data from disk to volume")
+    res = client.containers.run(image=RSYNC_IMAGE, command=cmd,
+                                remove=True, mounts=[src, dest])
+    if verbose:
+        print(res.decode("UTF-8"))
+    print("Done")
+
+
+def archive_to_volume(src, dest, compression, client, verbose, remove=False):
+    if not os.path.exists(src):
+        raise Exception("Source '{}' does not exist".format(src))
+
+    if volume_exists(dest, client):
+        print("Volume '{}' already exists".format(dest))
+        if remove:
+            print("...deleting!")
+            client.volumes.get(dest).remove()
+        else:
+            raise Exception("Not continuing")
+
+    client.volumes.create(dest)
+
+    flags = "-{}xvf".format(tar_compression_flag(compression))
+    if compression:
+        target = "/src.tar.{}".format(compression)
+    else:
+        target = "/src.tar"
+
+    cmd = ["tar", "-C", "/dest", flags, target]
+    src = docker.types.Mount(target=target, source=os.path.abspath(src),
+                             read_only=True, type="bind")
+    dest = docker.types.Mount(target="/dest", source=dest)
+
+    print("Importing data from archive to volume")
     res = client.containers.run(image=RSYNC_IMAGE, command=cmd,
                                 remove=True, mounts=[src, dest])
     if verbose:
