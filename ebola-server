@@ -83,7 +83,7 @@ def export_orderly_volume(root, path, verbose):
     import util
     s = deploy.get_service(os.path.join(root, CONFIG_FILE))
     src = s.volume_name("orderly")
-    util.volume_to_directory(src, path, s.client, verbose)
+    util.volume_export(src, path, s.client, verbose)
 
 
 def load_vault_token(root):
