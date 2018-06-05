@@ -11,6 +11,7 @@ ebola-server stop
 ebola-server configure
 ebola-server update-passwords
 ebola-server status
+ebola-server backup [--verbose] <path>
 """
 
 
@@ -99,6 +100,25 @@ def require_config(root):
     load_vault_token(root)
 
 
+## This is pretty bad, but should suffice in the short term
+def backup(root, path, verbose):
+    import util
+    s = deploy.get_service(os.path.join(root, CONFIG_FILE))
+    os.mkdir(path)
+    path_orderly_tar = os.path.join(path, "orderly.tar.gz")
+    path_db_tar = os.path.join(path, "db.tar.gz")
+    util.volume_export(s.volume_name("orderly"), path_orderly_tar,
+                       s.client, verbose)
+    print("!!! Taking down database container")
+    s.db.pause()
+    try:
+        util.volume_export(s.volume_name("db"), path_db_tar, s.client, verbose)
+    finally:
+        print("!!! Resuming database container")
+        s.db.unpause()
+        print("...OK")
+
+
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     root = os.path.dirname(sys.argv[0])
@@ -117,6 +137,9 @@ if __name__ == "__main__":
     elif args["export-orderly-volume"]:
         require_config(root)
         export_orderly_volume(root, args["<path>"], args["--verbose"])
+    elif args["backup"]:
+        require_config(root)
+        backup(root, args["<path>"], args["--verbose"])
     else:
         require_config(root)
         os.chdir(root)
