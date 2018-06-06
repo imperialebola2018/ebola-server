@@ -14,17 +14,19 @@ def volume_exists(volume_name, client):
         return False
 
 
-def volume_import(src, dest, client, verbose, remove=False, update=False):
+def volume_import(src, dest, client, verbose, remove=False, update=False,
+                  mirror=False):
     # This is possibly a bit magic, not sure:
     re_tar = re.compile(r"\.tar(\.(gz|bz2))?$")
     m = re_tar.search(src)
     if m:
         archive_to_volume(src, dest, m.groups()[1], client, verbose, remove)
     else:
-        directory_to_volume(src, dest, client, verbose, remove, update)
+        directory_to_volume(src, dest, client, verbose, remove, update, mirror)
 
 
-def directory_to_volume(src, dest, client, verbose, remove=False, update=False):
+def directory_to_volume(src, dest, client, verbose, remove=False, update=False,
+                        mirror=False):
     if not os.path.exists(src):
         raise Exception("Source '{}' does not exist".format(src))
 
@@ -37,9 +39,11 @@ def directory_to_volume(src, dest, client, verbose, remove=False, update=False):
             return;
 
     client.volumes.create(dest)
-    cmd = ["rsync", "-avh", "--delete",
+    cmd = ["rsync", "-avh",
            "--no-owner", "--no-group",
            "/src/", "/dest"]
+    if mirror:
+        cmd += ["--delete"]
     src = docker.types.Mount(target="/src", source=os.path.abspath(src),
                              read_only=True, type="bind")
     dest = docker.types.Mount(target="/dest", source=dest)
