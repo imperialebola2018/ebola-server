@@ -85,17 +85,17 @@ def archive_to_volume(src, dest, compression, client, verbose, remove=False):
     print("Done")
 
 
-def volume_export(src, dest, client, verbose):
+def volume_export(src, dest, client, verbose, mirror):
     # This is possibly a bit magic, not sure:
     re_tar = re.compile(r"\.tar(\.(gz|bz2))?$")
     m = re_tar.search(dest)
     if m:
         volume_to_archive(src, dest, m.groups()[1], client, verbose)
     else:
-        volume_to_directory(src, dest, client, verbose)
+        volume_to_directory(src, dest, client, verbose, mirror)
 
 
-def volume_to_directory(src, dest, client, verbose):
+def volume_to_directory(src, dest, client, verbose, mirror):
     if not volume_exists(src, client):
         raise Exception("Volume '{}' does not exist".format(src))
     if not os.path.exists(dest):
@@ -106,9 +106,11 @@ def volume_to_directory(src, dest, client, verbose):
 
     st = os.stat(dest)
     owner = "{}:{}".format(st.st_uid, st.st_gid)
-    cmd = ["rsync", "-avh", "--delete",
+    cmd = ["rsync", "-avh",
            "--owner", "--group", "--chown", owner,
            "/src/", "/dest/"]
+    if mirror:
+        cmd += ["--delete"]
 
     src_vol = docker.types.Mount(target="/src", source=src, read_only=True)
     dest_bind = docker.types.Mount(target="/dest", source=os.path.abspath(dest),
