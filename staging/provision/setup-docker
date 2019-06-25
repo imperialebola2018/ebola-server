@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -ex
+
+COMPOSE_VERSION=1.22.0
+
+if [ ! -z $DOCKER_LARGE_DISK ]; then
+    DOCKER_LIB=/var/lib/docker
+    DOCKER_LIB_LARGE="${DOCKER_LARGE_DISK}/docker/var-lib-docker"
+    if [ ! -d $DOCKER_LARGE_DISK ]; then
+        echo "Expected a directory at $DOCKER_LARGE_DISK"
+        exit 1
+    fi
+
+    if [ -L $DOCKER_LIB ]; then
+        if [ $(readlink $DOCKER_LIB) = $DOCKER_LIB_LARGE ]; then
+            echo "Docker large disk already configured"
+        else
+            echo "Docker large disk pointing to unexpected location"
+            exit 1
+        fi
+    elif [ -d $DOCKER_LIB ]; then
+        echo "Docker already configured - can't move it at this point"
+        exit 1
+    else
+        echo "Configuring docker to use $DOCKER_LIB_LARGE"
+        # The big docker directory is $DOCKER_LIB - we'll move that
+        # out onto the external disk:
+        mkdir -p "$DOCKER_LIB_LARGE"
+        ln -s "$DOCKER_LIB_LARGE" $DOCKER_LIB
+    fi
+fi
+
+if which -a docker > /dev/null; then
+    echo "docker is already installed"
+else
+    echo "installing docker"
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository \
+         "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+    sudo apt-get update
+    sudo apt-get install -y docker-ce
+    for u in "$@"; do
+        sudo usermod -aG docker "$u"
+    done
+fi
+
+if which -a docker-compose > /dev/null; then
+    echo "docker-compose is already installed"
+else
+    echo "installing docker-compose"
+    sudo curl -L \
+         "https://github.com/docker/compose/releases/download/$COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" \
+         -o /usr/bin/docker-compose
+    sudo chmod +x /usr/bin/docker-compose
+fi
