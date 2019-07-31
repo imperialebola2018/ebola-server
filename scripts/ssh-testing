@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+(cd ~server/staging && vagrant ssh)
